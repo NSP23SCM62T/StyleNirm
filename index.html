@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#1a0a2e"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="StyleNirm"/>
+  <title>StyleNirm ✨</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon-192.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0a1a;
+      --bg2: #16102a;
+      --bg3: #1e1535;
+      --card: #1a1330;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.14);
+      --text: #f5f0ff;
+      --muted: #8878aa;
+      --accent: #e8b4f8;
+      --gold: #f5c842;
+      --rose: #f87ab0;
+      --mint: #7ef8c8;
+      --coral: #ff8c70;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bot: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow: hidden; }
+    .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+    .screen { display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    /* TOPBAR */
+    .topbar { padding: calc(var(--safe-top) + 16px) 20px 14px; display: flex; align-items: center; justify-content: space-between; background: var(--bg); position: sticky; top: 0; z-index: 10; border-bottom: 0.5px solid var(--border); }
+    .topbar-title { font-family: 'Playfair Display', serif; font-size: 22px; }
+    .topbar-sub { font-size: 12px; color: var(--muted); }
+
+    /* NAV */
+    .nav { display: flex; background: var(--bg2); border-top: 0.5px solid var(--border); padding-bottom: var(--safe-bot); position: fixed; bottom: 0; left: 0; right: 0; z-index: 20; }
+    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 9px 0; border: none; background: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 9px; cursor: pointer; transition: color 0.2s; }
+    .nav-btn.active { color: var(--accent); }
+    .nav-icon { font-size: 20px; line-height: 1; }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 11px 20px; border-radius: 99px; border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--rose)); color: #1a0a2e; }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-ghost { background: rgba(255,255,255,0.06); color: var(--text); border: 0.5px solid var(--border2); }
+    .btn-ghost:active { transform: scale(0.97); }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* HOME */
+    .home-hero { padding: 24px 20px 8px; }
+    .greeting { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .hero-title { font-family: 'Playfair Display', serif; font-size: 30px; line-height: 1.2; margin-bottom: 6px; }
+    .hero-title em { font-style: italic; color: var(--accent); }
+    .hero-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .today-card { background: var(--card); border: 0.5px solid rgba(232,180,248,0.2); border-radius: 22px; padding: 20px; margin: 0 20px 16px; }
+    .today-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+    .look-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .look-item { background: var(--bg3); border-radius: 12px; padding: 10px; }
+    .look-item-cat { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+    .look-item-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .no-plan { color: var(--muted); font-size: 14px; line-height: 1.6; text-align: center; padding: 10px 0; }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 20px 20px; }
+    .stat-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 14px; padding: 12px 8px; text-align: center; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--accent); }
+    .stat-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .section-head { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 0 20px; margin-bottom: 10px; }
+
+    /* WARDROBE SCREEN */
+    .cat-tabs { display: flex; gap: 8px; padding: 12px 20px; overflow-x: auto; scrollbar-width: none; }
+    .cat-tabs::-webkit-scrollbar { display: none; }
+    .cat-tab { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 14px; border-radius: 14px; border: 0.5px solid var(--border2); background: transparent; cursor: pointer; min-width: 64px; transition: all 0.2s; }
+    .cat-tab.active { background: rgba(232,180,248,0.12); border-color: rgba(232,180,248,0.4); }
+    .cat-tab-icon { font-size: 22px; }
+    .cat-tab-label { font-size: 10px; color: var(--muted); font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+    .cat-tab.active .cat-tab-label { color: var(--accent); }
+    .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px 20px; }
+    .item-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 18px; overflow: hidden; position: relative; }
+    .item-img { width: 100%; aspect-ratio: 1; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 48px; overflow: hidden; }
+    .item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .item-info { padding: 10px 12px; }
+    .item-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .item-del { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.55); border: none; border-radius: 99px; width: 28px; height: 28px; color: white; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+    .item-card:hover .item-del { opacity: 1; }
+    .add-fab { position: fixed; bottom: calc(80px + var(--safe-bot) + 14px); right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--rose)); border: none; color: #1a0a2e; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 24px rgba(232,180,248,0.45); z-index: 15; transition: transform 0.2s; font-weight: 300; }
+    .add-fab:active { transform: scale(0.92); }
+    .empty-state { grid-column: 1/-1; text-align: center; padding: 40px 20px; color: var(--muted); }
+    .empty-icon { font-size: 44px; margin-bottom: 10px; }
+
+    /* SUGGEST SCREEN */
+    .suggest-wrap { padding: 0 20px 20px; }
+    .form-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; display: block; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .chip { padding: 8px 14px; border-radius: 99px; border: 0.5px solid var(--border2); background: transparent; color: var(--text); font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .chip.on { background: rgba(232,180,248,0.15); color: var(--accent); border-color: rgba(232,180,248,0.4); }
+    .api-wrap { position: relative; margin-bottom: 6px; }
+    .api-inp { width: 100%; background: var(--card); border: 0.5px solid var(--border2); border-radius: 12px; padding: 12px 44px 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; }
+    .api-inp:focus { outline: none; border-color: var(--accent); }
+    .api-eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; }
+    .api-hint { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 18px; }
+    .api-hint strong { color: var(--accent); }
+
+    /* RESULT */
+    .result-card { background: var(--card); border: 0.5px solid rgba(232,180,248,0.2); border-radius: 22px; padding: 20px; margin-top: 20px; }
+    .result-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+    .look-section { margin-bottom: 16px; }
+    .look-section-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .look-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(126,248,200,0.1); color: var(--mint); border: 0.5px solid rgba(126,248,200,0.3); border-radius: 99px; padding: 5px 12px; font-size: 13px; margin: 3px; }
+    .result-reason { font-size: 14px; line-height: 1.75; color: var(--text); border-top: 0.5px solid var(--border); padding-top: 14px; margin-top: 4px; }
+    .loading-row { display: flex; gap: 6px; align-items: center; padding: 10px 0; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.4s ease-in-out infinite; }
+    .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+    @keyframes pulse{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+    .save-row { display: flex; gap: 8px; margin-top: 14px; }
+
+    /* PLANNER */
+    .plan-wrap { padding: 0 20px 20px; }
+    .plan-intro { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+    .day-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 12px; }
+    .day-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .day-name { font-size: 15px; font-weight: 500; }
+    .day-date { font-size: 12px; color: var(--muted); }
+    .day-look { display: flex; flex-wrap: wrap; gap: 6px; }
+    .day-pill { background: rgba(232,180,248,0.1); color: var(--accent); border: 0.5px solid rgba(232,180,248,0.25); border-radius: 99px; padding: 4px 10px; font-size: 12px; }
+    .day-empty { font-size: 13px; color: var(--muted); }
+    .day-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .day-btn { background: rgba(255,255,255,0.05); border: 0.5px dashed var(--border2); color: var(--muted); border-radius: 99px; padding: 5px 14px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .day-btn-danger { border-color: rgba(248,122,176,0.3); color: var(--rose); }
+
+    /* MODALS */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(6px); }
+    .overlay.open { display: flex; }
+    .modal { background: var(--bg2); border-radius: 26px 26px 0 0; width: 100%; max-height: 93vh; overflow-y: auto; padding: 20px 20px calc(20px + var(--safe-bot)); }
+    .modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 99px; margin: 0 auto 20px; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .photo-box { width: 100%; aspect-ratio: 1; background: var(--card); border: 1.5px dashed var(--border2); border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; overflow: hidden; position: relative; margin-bottom: 14px; }
+    .photo-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .photo-box-text { font-size: 13px; color: var(--muted); text-align: center; position: relative; z-index: 1; }
+    .photo-box-icon { font-size: 36px; position: relative; z-index: 1; }
+    #photoIn { display: none; }
+    .f-input { width: 100%; background: var(--card); border: 0.5px solid var(--border2); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; margin-bottom: 10px; }
+    .f-input:focus { outline: none; border-color: var(--accent); }
+    .f-select { width: 100%; background: var(--card); border: 0.5px solid var(--border2); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; margin-bottom: 10px; appearance: none; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 8px; }
+    .modal-btns .btn { flex: 1; justify-content: center; }
+    .select-list { display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow-y: auto; margin-bottom: 16px; }
+    .select-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--card); border-radius: 12px; border: 0.5px solid var(--border); cursor: pointer; transition: border-color 0.15s; }
+    .select-row.picked { border-color: rgba(232,180,248,0.45); }
+    .select-row-emoji { font-size: 24px; flex-shrink: 0; }
+    .select-row-info { flex: 1; }
+    .select-row-name { font-size: 14px; font-weight: 500; }
+    .select-row-meta { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .check-circle { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; transition: all 0.15s; }
+    .select-row.picked .check-circle { background: var(--accent); border-color: var(--accent); color: #1a0a2e; }
+    .toast { position: fixed; top: calc(var(--safe-top) + 64px); left: 50%; transform: translateX(-50%) translateY(-16px); background: linear-gradient(135deg,var(--accent),var(--rose)); color: #1a0a2e; padding: 10px 22px; border-radius: 99px; font-size: 14px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 200; white-space: nowrap; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    select option { background: #1a1330; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- BOTTOM NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="go('home')"><span class="nav-icon">🏠</span>Home</button>
+    <button class="nav-btn" onclick="go('wardrobe')"><span class="nav-icon">👗</span>Wardrobe</button>
+    <button class="nav-btn" onclick="go('suggest')"><span class="nav-icon">✨</span>AI Stylist</button>
+    <button class="nav-btn" onclick="go('plan')"><span class="nav-icon">📅</span>Planner</button>
+  </nav>
+
+  <!-- ═══ HOME ═══ -->
+  <div class="screen active" id="s-home">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">StyleNirm ✨</div>
+        <div class="topbar-sub" id="home-date"></div>
+      </div>
+    </div>
+    <div class="home-hero">
+      <p class="greeting">Good morning, Nirm 👋</p>
+      <h1 class="hero-title">Look beautiful,<br/><em>effortlessly.</em></h1>
+      <p class="hero-sub">Your complete outfit is planned — just get dressed! 💕</p>
+    </div>
+    <div class="today-card">
+      <div class="today-label">✨ Today's complete look</div>
+      <div id="home-today-look"><p class="no-plan">No outfit planned yet.<br/>Go to AI Stylist to get your look! 💫</p></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="st-clothes">0</div><div class="stat-lbl">Clothes</div></div>
+      <div class="stat-card"><div class="stat-num" id="st-shoes">0</div><div class="stat-lbl">Shoes</div></div>
+      <div class="stat-card"><div class="stat-num" id="st-jewel">0</div><div class="stat-lbl">Jewels</div></div>
+      <div class="stat-card"><div class="stat-num" id="st-bags">0</div><div class="stat-lbl">Bags</div></div>
+    </div>
+    <p class="section-head">Recently added</p>
+    <div style="padding:0 20px;display:flex;flex-direction:column;gap:8px" id="recent-home"></div>
+  </div>
+
+  <!-- ═══ WARDROBE ═══ -->
+  <div class="screen" id="s-wardrobe">
+    <div class="topbar">
+      <div class="topbar-title">My Wardrobe</div>
+      <span class="topbar-sub" id="wrd-count"></span>
+    </div>
+    <div class="cat-tabs" id="cat-tabs">
+      <button class="cat-tab active" onclick="filterCat('all',this)"><span class="cat-tab-icon">🌟</span><span class="cat-tab-label">All</span></button>
+      <button class="cat-tab" onclick="filterCat('top',this)"><span class="cat-tab-icon">👕</span><span class="cat-tab-label">Tops</span></button>
+      <button class="cat-tab" onclick="filterCat('bottom',this)"><span class="cat-tab-icon">👖</span><span class="cat-tab-label">Bottoms</span></button>
+      <button class="cat-tab" onclick="filterCat('dress',this)"><span class="cat-tab-icon">👗</span><span class="cat-tab-label">Dresses</span></button>
+      <button class="cat-tab" onclick="filterCat('outerwear',this)"><span class="cat-tab-icon">🧥</span><span class="cat-tab-label">Outerwear</span></button>
+      <button class="cat-tab" onclick="filterCat('shoes',this)"><span class="cat-tab-icon">👠</span><span class="cat-tab-label">Shoes</span></button>
+      <button class="cat-tab" onclick="filterCat('earrings',this)"><span class="cat-tab-icon">💍</span><span class="cat-tab-label">Earrings</span></button>
+      <button class="cat-tab" onclick="filterCat('necklace',this)"><span class="cat-tab-icon">📿</span><span class="cat-tab-label">Necklace</span></button>
+      <button class="cat-tab" onclick="filterCat('bag',this)"><span class="cat-tab-icon">👜</span><span class="cat-tab-label">Bags</span></button>
+      <button class="cat-tab" onclick="filterCat('extras',this)"><span class="cat-tab-icon">🧣</span><span class="cat-tab-label">Extras</span></button>
+    </div>
+    <div class="items-grid" id="items-grid"></div>
+    <button class="add-fab" onclick="openAdd()">＋</button>
+  </div>
+
+  <!-- ═══ AI STYLIST ═══ -->
+  <div class="screen" id="s-suggest">
+    <div class="topbar"><div class="topbar-title">AI Stylist 💫</div></div>
+    <div class="suggest-wrap">
+      <label class="form-label">What's the occasion?</label>
+      <div class="chip-row" id="occ-chips">
+        <button class="chip on" onclick="pickChip(this,'occ')">Office 💼</button>
+        <button class="chip" onclick="pickChip(this,'occ')">Meeting 🤝</button>
+        <button class="chip" onclick="pickChip(this,'occ')">Casual 😊</button>
+        <button class="chip" onclick="pickChip(this,'occ')">Dinner 🍽️</button>
+        <button class="chip" onclick="pickChip(this,'occ')">Party 🎉</button>
+        <button class="chip" onclick="pickChip(this,'occ')">Travel ✈️</button>
+      </div>
+      <label class="form-label">Today's weather?</label>
+      <div class="chip-row" id="wea-chips">
+        <button class="chip on" onclick="pickChip(this,'wea')">Hot ☀️</button>
+        <button class="chip" onclick="pickChip(this,'wea')">Warm 🌤️</button>
+        <button class="chip" onclick="pickChip(this,'wea')">Cool 🌬️</button>
+        <button class="chip" onclick="pickChip(this,'wea')">Cold ❄️</button>
+        <button class="chip" onclick="pickChip(this,'wea')">Rainy 🌧️</button>
+      </div>
+      <label class="form-label">Your style vibe today?</label>
+      <div class="chip-row" id="vibe-chips">
+        <button class="chip on" onclick="pickChip(this,'vibe')">Elegant 👑</button>
+        <button class="chip" onclick="pickChip(this,'vibe')">Minimal ✨</button>
+        <button class="chip" onclick="pickChip(this,'vibe')">Bold 🔥</button>
+        <button class="chip" onclick="pickChip(this,'vibe')">Cute 🌸</button>
+        <button class="chip" onclick="pickChip(this,'vibe')">Classic 🎯</button>
+      </div>
+      <label class="form-label">Anthropic API Key</label>
+      <div class="api-wrap">
+        <input class="api-inp" type="password" id="apiKey" placeholder="sk-ant-..." oninput="saveKey()"/>
+        <button class="api-eye" onclick="toggleKey()">👁</button>
+      </div>
+      <p class="api-hint">Get free key at <strong>console.anthropic.com</strong> → API Keys. Stored only on your phone.</p>
+      <button class="btn btn-primary btn-full" onclick="getFullLook()">✨ Create My Complete Look</button>
+      <div id="result-area"></div>
+    </div>
+  </div>
+
+  <!-- ═══ PLANNER ═══ -->
+  <div class="screen" id="s-plan">
+    <div class="topbar"><div class="topbar-title">Weekly Planner 📅</div></div>
+    <div class="plan-wrap">
+      <p class="plan-intro">Plan your complete look for each day — clothes, shoes, jewellery and all! Never stress about what to wear in the morning. 💕</p>
+      <div id="plan-days"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD ITEM MODAL -->
+<div class="overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add to Wardrobe</div>
+    <div class="modal-sub">Add any clothing, shoes, jewellery or accessory</div>
+    <div class="photo-box" id="photo-box" onclick="document.getElementById('photoIn').click()">
+      <div class="photo-box-icon">📷</div>
+      <div class="photo-box-text">Tap to add photo<br/><span style="font-size:11px">from your gallery</span></div>
+    </div>
+    <input type="file" id="photoIn" accept="image/*" onchange="onPhoto(event)"/>
+    <input class="f-input" type="text" id="f-name" placeholder="Name (e.g. Gold hoop earrings)"/>
+    <select class="f-select" id="f-cat">
+      <optgroup label="👗 Clothing">
+        <option value="top">👕 Top / Shirt / Blouse</option>
+        <option value="bottom">👖 Bottom / Pants / Skirt</option>
+        <option value="dress">👗 Dress / Saree / Jumpsuit</option>
+        <option value="outerwear">🧥 Jacket / Blazer / Cardigan</option>
+      </optgroup>
+      <optgroup label="👠 Footwear">
+        <option value="shoes">👠 Heels</option>
+        <option value="shoes">👟 Sneakers / Flats</option>
+        <option value="shoes">🥿 Sandals / Slippers</option>
+        <option value="shoes">👢 Boots</option>
+      </optgroup>
+      <optgroup label="💍 Jewellery">
+        <option value="earrings">💍 Earrings</option>
+        <option value="necklace">📿 Necklace / Chain</option>
+        <option value="earrings">💎 Bracelet / Bangle</option>
+        <option value="earrings">💍 Ring</option>
+      </optgroup>
+      <optgroup label="👜 Bags & Extras">
+        <option value="bag">👜 Handbag / Purse</option>
+        <option value="bag">💼 Office Bag / Tote</option>
+        <option value="extras">🧣 Scarf / Dupatta</option>
+        <option value="extras">👒 Hat / Hairband</option>
+        <option value="extras">🕶️ Sunglasses</option>
+        <option value="extras">👛 Belt / Waistband</option>
+      </optgroup>
+    </select>
+    <input class="f-input" type="text" id="f-color" placeholder="Color (e.g. Rose gold, Pearl white)"/>
+    <select class="f-select" id="f-style">
+      <option>Casual</option><option>Formal</option><option>Smart casual</option>
+      <option>Traditional / Ethnic</option><option>Party / Glam</option><option>Sporty</option><option>Minimalist</option>
+    </select>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeOverlay('add-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveItem()">Add Item ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLAN SELECTOR MODAL -->
+<div class="overlay" id="plan-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="pm-title">Plan Your Look</div>
+    <div class="modal-sub">Select items for a complete head-to-toe look 💕</div>
+    <div class="select-list" id="pm-list"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeOverlay('plan-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDayPlan()">Save Look 💕</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CATEGORIES ───────────────────────────────────────────
+const CAT_EMOJI = {top:'👕',bottom:'👖',dress:'👗',outerwear:'🧥',shoes:'👠',earrings:'💍',necklace:'📿',bag:'👜',extras:'🧣'};
+const CAT_GROUP = {top:'Clothing',bottom:'Clothing',dress:'Clothing',outerwear:'Clothing',shoes:'Shoes',earrings:'Jewellery',necklace:'Jewellery',bag:'Bag',extras:'Extras'};
+
+// ─── DATA ─────────────────────────────────────────────────
+let items = JSON.parse(localStorage.getItem('sn_items')||'[]');
+let plans = JSON.parse(localStorage.getItem('sn_plans')||'{}');
+let history = JSON.parse(localStorage.getItem('sn_history')||'[]');
+let pendingPhoto = null;
+let planDay = null;
+let planPicked = new Set();
+
+function persist() {
+  localStorage.setItem('sn_items', JSON.stringify(items));
+  localStorage.setItem('sn_plans', JSON.stringify(plans));
+  localStorage.setItem('sn_history', JSON.stringify(history));
+}
+
+// ─── SCREENS ──────────────────────────────────────────────
+const SCREENS = ['home','wardrobe','suggest','plan'];
+function go(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('s-'+name).classList.add('active');
+  document.querySelectorAll('.nav-btn')[SCREENS.indexOf(name)].classList.add('active');
+  if(name==='home') renderHome();
+  if(name==='wardrobe') renderWardrobe();
+  if(name==='plan') renderPlan();
+}
+
+// ─── HOME ─────────────────────────────────────────────────
+function renderHome() {
+  const now = new Date();
+  document.getElementById('home-date').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('st-clothes').textContent = items.filter(i=>['top','bottom','dress','outerwear'].includes(i.cat)).length;
+  document.getElementById('st-shoes').textContent = items.filter(i=>i.cat==='shoes').length;
+  document.getElementById('st-jewel').textContent = items.filter(i=>['earrings','necklace'].includes(i.cat)).length;
+  document.getElementById('st-bags').textContent = items.filter(i=>['bag','extras'].includes(i.cat)).length;
+  const todayPlan = plans[now.toDateString()];
+  const tl = document.getElementById('home-today-look');
+  if(todayPlan && todayPlan.length) {
+    const groups = {};
+    todayPlan.forEach(name => {
+      const item = items.find(i=>i.name===name);
+      if(item) { const g = CAT_GROUP[item.cat]||'Other'; if(!groups[g]) groups[g]=[]; groups[g].push(item); }
+    });
+    tl.innerHTML = '<div class="look-grid">'+Object.entries(groups).map(([g,its])=>`
+      <div class="look-item"><div class="look-item-cat">${g}</div><div class="look-item-name">${its.map(i=>i.name).join(', ')}</div></div>
+    `).join('')+'</div>';
+  } else {
+    tl.innerHTML='<p class="no-plan">No outfit planned yet.<br/>Go to AI Stylist to get your complete look! 💫</p>';
+  }
+  const rec = items.slice(-3).reverse();
+  document.getElementById('recent-home').innerHTML = rec.map(i=>`
+    <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:12px 14px">
+      <div style="font-size:${i.photo?'0':'28px'}">${i.photo?`<img src="${i.photo}" style="width:44px;height:44px;border-radius:10px;object-fit:cover">`:CAT_EMOJI[i.cat]}</div>
+      <div><div style="font-size:14px;font-weight:500">${i.name}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${CAT_GROUP[i.cat]}${i.color?' · '+i.color:''}</div></div>
+    </div>
+  `).join('') || '<div style="text-align:center;padding:20px;color:var(--muted);font-size:14px">Add your first item in Wardrobe! 👗</div>';
+}
+
+// ─── WARDROBE ─────────────────────────────────────────────
+let activeCat = 'all';
+function renderWardrobe(cat) {
+  if(cat) activeCat = cat;
+  const list = activeCat==='all' ? items : items.filter(i=>i.cat===activeCat);
+  document.getElementById('wrd-count').textContent = items.length+' items';
+  const grid = document.getElementById('items-grid');
+  if(!list.length) {
+    grid.innerHTML='<div class="empty-state"><div class="empty-icon">'+(CAT_EMOJI[activeCat]||'✨')+'</div><p style="font-size:14px">No items here yet.<br/>Tap ＋ to add!</p></div>';
+    return;
+  }
+  grid.innerHTML = list.map(i=>`
+    <div class="item-card">
+      <div class="item-img">${i.photo?`<img src="${i.photo}" alt="${i.name}">`:CAT_EMOJI[i.cat]}</div>
+      <button class="item-del" onclick="delItem(${i.id},event)">✕</button>
+      <div class="item-info">
+        <div class="item-name">${i.name}</div>
+        <div class="item-meta">${i.color||''}${i.color?' · ':''}${i.style}</div>
+      </div>
+    </div>
+  `).join('');
+}
+function filterCat(cat, el) {
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderWardrobe(cat);
+}
+function delItem(id,e) {
+  e.stopPropagation();
+  if(!confirm('Remove this item?')) return;
+  items = items.filter(i=>i.id!==id);
+  persist(); renderWardrobe();
+  toast('Item removed');
+}
+
+// ─── ADD ITEM ─────────────────────────────────────────────
+function openAdd() {
+  pendingPhoto = null;
+  document.getElementById('photo-box').innerHTML = '<div class="photo-box-icon">📷</div><div class="photo-box-text">Tap to add photo<br/><span style="font-size:11px">from your gallery</span></div>';
+  document.getElementById('f-name').value='';
+  document.getElementById('f-color').value='';
+  openOverlay('add-modal');
+}
+function onPhoto(e) {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => { pendingPhoto=ev.target.result; document.getElementById('photo-box').innerHTML=`<img src="${pendingPhoto}">`; };
+  r.readAsDataURL(f);
+}
+function saveItem() {
+  const name = document.getElementById('f-name').value.trim();
+  if(!name) { toast('Please enter a name 😊'); return; }
+  items.push({ id:Date.now(), name, cat:document.getElementById('f-cat').value, color:document.getElementById('f-color').value.trim(), style:document.getElementById('f-style').value, photo:pendingPhoto });
+  persist(); renderWardrobe();
+  closeOverlay('add-modal');
+  toast('Added to wardrobe! ✨');
+}
+
+// ─── AI STYLIST ───────────────────────────────────────────
+function pickChip(el, group) {
+  el.closest('.chip-row').querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+}
+function saveKey() { localStorage.setItem('sn_key', document.getElementById('apiKey').value); }
+function toggleKey() { const i=document.getElementById('apiKey'); i.type=i.type==='password'?'text':'password'; }
+window.addEventListener('load', ()=>{ const k=localStorage.getItem('sn_key'); if(k) document.getElementById('apiKey').value=k; renderHome(); });
+
+async function getFullLook() {
+  if(items.length < 3) { toast('Add more items to your wardrobe first! 👗'); return; }
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if(!apiKey) { toast('Please enter your API key 🔑'); return; }
+  const occasion = document.querySelector('#occ-chips .chip.on')?.textContent||'Office';
+  const weather = document.querySelector('#wea-chips .chip.on')?.textContent||'Warm';
+  const vibe = document.querySelector('#vibe-chips .chip.on')?.textContent||'Elegant';
+  const ra = document.getElementById('result-area');
+  ra.innerHTML=`<div class="result-card"><div class="result-label">Creating your complete look...</div><div class="loading-row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+
+  // Build wardrobe list by group
+  const groups = { Clothing:[], Shoes:[], Jewellery:[], Bags:[], Extras:[] };
+  items.forEach(i=>{ const g=CAT_GROUP[i.cat]||'Extras'; if(groups[g]) groups[g].push(i); });
+  const wardrobeText = Object.entries(groups).filter(([,v])=>v.length).map(([g,v])=>
+    `${g}:\n`+v.map(i=>`  - ${i.name}${i.color?' ('+i.color+')':''} [${i.style}]`).join('\n')
+  ).join('\n\n');
+
+  const prompt = `You are a professional personal stylist. Create a complete head-to-toe look for the user.
+
+WARDROBE:
+${wardrobeText}
+
+REQUIREMENTS:
+- Occasion: ${occasion}
+- Weather: ${weather}
+- Style vibe: ${vibe}
+
+Create a COMPLETE look by picking specific items from the wardrobe. Format your response EXACTLY like this:
+
+CLOTHING: [exact item name from wardrobe]
+SHOES: [exact item name from wardrobe]
+JEWELLERY: [exact earring or necklace name, or "Keep it minimal"]
+BAG: [exact bag name from wardrobe, or "Any neutral bag"]
+EXTRAS: [scarf/belt/other, or "None needed"]
+REASON: [3 sentences — why these items work together, why it suits the occasion and weather, and one beauty/confidence tip for Nirm]
+
+Be specific, warm, and encouraging. Make Nirm feel confident and beautiful!`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    const data = await res.json();
+    if(data.error){ra.innerHTML=`<div class="result-card"><p style="color:var(--rose);font-size:14px">❌ ${data.error.message}</p></div>`;return;}
+    const text = data.content?.map(b=>b.text||'').join('');
+    const get = (key) => { const m=text.match(new RegExp(key+':\\s*(.+)','i')); return m?m[1].trim():''; };
+    const clothing=get('CLOTHING'), shoes=get('SHOES'), jewellery=get('JEWELLERY'), bag=get('BAG'), extras=get('EXTRAS'), reason=get('REASON');
+    const lookItems = [clothing,shoes,jewellery,bag,extras].filter(x=>x&&x.toLowerCase()!=='none needed'&&x.toLowerCase()!=='any neutral bag'&&x.toLowerCase()!=='keep it minimal');
+    // save to history
+    history.unshift({date:new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}),occasion,items:{clothing,shoes,jewellery,bag,extras},reason});
+    if(history.length>30) history=history.slice(0,30);
+    persist();
+    ra.innerHTML=`<div class="result-card">
+      <div class="result-label">Your complete look · ${occasion}</div>
+      ${clothing?`<div class="look-section"><div class="look-section-title">👗 Clothing</div><span class="look-pill">${clothing}</span></div>`:''}
+      ${shoes?`<div class="look-section"><div class="look-section-title">👠 Shoes</div><span class="look-pill">${shoes}</span></div>`:''}
+      ${jewellery?`<div class="look-section"><div class="look-section-title">💍 Jewellery</div><span class="look-pill">${jewellery}</span></div>`:''}
+      ${bag?`<div class="look-section"><div class="look-section-title">👜 Bag</div><span class="look-pill">${bag}</span></div>`:''}
+      ${extras&&extras.toLowerCase()!=='none needed'?`<div class="look-section"><div class="look-section-title">🧣 Extras</div><span class="look-pill">${extras}</span></div>`:''}
+      <div class="result-reason">💕 ${reason}</div>
+      <div class="save-row">
+        <button class="btn btn-ghost" style="font-size:13px;flex:1;justify-content:center" onclick='saveToday(${JSON.stringify(lookItems)})'>📅 Save to Today</button>
+      </div>
+    </div>`;
+  } catch(err) {
+    ra.innerHTML=`<div class="result-card"><p style="color:var(--rose);font-size:14px">Connection error. Check your API key and internet.</p></div>`;
+  }
+}
+function saveToday(lookItems) {
+  plans[new Date().toDateString()] = lookItems;
+  persist(); toast("Saved to today's plan! 📅");
+}
+
+// ─── PLANNER ──────────────────────────────────────────────
+function renderPlan() {
+  const now = new Date();
+  const container = document.getElementById('plan-days');
+  const days = Array.from({length:7},(_,i)=>{ const d=new Date(now); d.setDate(now.getDate()+i); return d; });
+  container.innerHTML = days.map((d,i)=>{
+    const key = d.toDateString();
+    const plan = plans[key]||[];
+    const label = i===0?'Today 🌟':i===1?'Tomorrow':d.toLocaleDateString('en-US',{weekday:'long'});
+    return `<div class="day-card" style="${i===0?'border-color:rgba(232,180,248,0.35)':''}">
+      <div class="day-header">
+        <span class="day-name">${label}</span>
+        <span class="day-date">${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
+      </div>
+      <div class="day-look">${plan.length ? plan.map(n=>`<span class="day-pill">${n}</span>`).join('') : '<span class="day-empty">No look planned yet</span>'}</div>
+      <div class="day-actions">
+        <button class="day-btn" onclick="openPlanModal('${key}','${label}')">＋ Plan look</button>
+        ${plan.length?`<button class="day-btn day-btn-danger" onclick="clearDay('${key}')">✕ Clear</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function openPlanModal(dayKey, label) {
+  planDay = dayKey;
+  planPicked = new Set(plans[dayKey]||[]);
+  document.getElementById('pm-title').textContent = label;
+  const list = document.getElementById('pm-list');
+  if(!items.length) { list.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px;font-size:14px">Add items to your wardrobe first! 👗</p>'; }
+  else {
+    // Group by category group
+    const groups = {};
+    items.forEach(i=>{ const g=CAT_GROUP[i.cat]||'Other'; if(!groups[g]) groups[g]=[]; groups[g].push(i); });
+    list.innerHTML = Object.entries(groups).map(([g,its])=>
+      `<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px">${g}</div>`+
+      its.map(i=>{
+        const sel=planPicked.has(i.name);
+        return `<div class="select-row${sel?' picked':''}" onclick="togglePick('${i.name.replace(/'/g,"\\'")}',this)">
+          <div class="select-row-emoji">${i.photo?`<img src="${i.photo}" style="width:40px;height:40px;border-radius:10px;object-fit:cover">`:CAT_EMOJI[i.cat]}</div>
+          <div class="select-row-info"><div class="select-row-name">${i.name}</div><div class="select-row-meta">${i.color||''}${i.color?' · ':''}${i.style}</div></div>
+          <div class="check-circle">${sel?'✓':''}</div>
+        </div>`;
+      }).join('')
+    ).join('');
+  }
+  openOverlay('plan-modal');
+}
+function togglePick(name, el) {
+  if(planPicked.has(name)) planPicked.delete(name); else planPicked.add(name);
+  const sel=planPicked.has(name);
+  el.classList.toggle('picked',sel);
+  const c=el.querySelector('.check-circle');
+  c.style.background=sel?'var(--accent)':''; c.style.borderColor=sel?'var(--accent)':''; c.textContent=sel?'✓':'';
+}
+function saveDayPlan() { plans[planDay]=[...planPicked]; persist(); closeOverlay('plan-modal'); renderPlan(); toast('Look planned! 💕'); }
+function clearDay(key) { delete plans[key]; persist(); renderPlan(); toast('Plan cleared'); }
+
+// ─── UTILS ────────────────────────────────────────────────
+function openOverlay(id) { document.getElementById(id).classList.add('open'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+function toast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
+}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+</script>
+</body>
+</html>
